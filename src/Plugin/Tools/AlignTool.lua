@@ -22,12 +22,29 @@ function AlignTool:OnKeyDown(input)
 		[Enum.KeyCode.O] = "Front",
 	}
 	local side = map[input.KeyCode]
-	if not side then return end
-	local sel = self.ctx.selectionStore:Get()
-	if #sel < 2 then return end
-	self.ctx.history:Waypoint("Builder: Align " .. side .. " (start)")
-	self.ctx.align:AlignToFirst(sel, side)
-	self.ctx.history:Waypoint("Builder: Align " .. side .. " (end)")
+	if side then
+		local sel = self.ctx.selectionStore:Get(); if #sel < 2 then return end
+		self.ctx.history:Waypoint("Builder: Align " .. side .. " (start)")
+		self.ctx.align:AlignToFirst(sel, side)
+		self.ctx.history:Waypoint("Builder: Align " .. side .. " (end)")
+		return
+	end
+	if input.KeyCode == Enum.KeyCode.C then
+		local sel = self.ctx.selectionStore:Get(); if #sel < 2 then return end
+		self.ctx.history:Waypoint("Builder: Align Center (start)")
+		self.ctx.align:CenterToFirst(sel)
+		self.ctx.history:Waypoint("Builder: Align Center (end)")
+	elseif input.KeyCode == Enum.KeyCode.T then
+		local sel = self.ctx.selectionStore:Get(); if #sel < 2 then return end
+		self.ctx.history:Waypoint("Builder: Match Rotation (start)")
+		self.ctx.align:MatchRotation(sel)
+		self.ctx.history:Waypoint("Builder: Match Rotation (end)")
+	elseif input.KeyCode == Enum.KeyCode.S then
+		local sel = self.ctx.selectionStore:Get(); if #sel < 2 then return end
+		self.ctx.history:Waypoint("Builder: Match Size (start)")
+		self.ctx.align:MatchSize(sel)
+		self.ctx.history:Waypoint("Builder: Match Size (end)")
+	end
 end
 
 return AlignTool

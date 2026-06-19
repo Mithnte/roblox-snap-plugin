@@ -9,6 +9,8 @@ local VisualService = require(script.Services.VisualService)
 local InputService = require(script.Services.InputService)
 local ToolController = require(script.Services.ToolController)
 local AlignService = require(script.Services.AlignService)
+local ArrayService = require(script.Services.ArrayService)
+local CommandPalette = require(script.Services.CommandPalette)
 
 local SelectTool = require(script.Tools.SelectTool)
 local MoveTool = require(script.Tools.MoveTool)
@@ -37,12 +39,16 @@ local ctx = {
 	ray = nil,
 	align = nil,
 	visual = nil,
+	array = nil,
+	palette = nil,
 	_keyState = keyState,
 }
 
 ctx.ray = RaycastService.new(ctx)
 ctx.align = AlignService.new(ctx)
 ctx.visual = VisualService.new()
+ctx.array = ArrayService.new(ctx)
+ctx.palette = CommandPalette.new(ctx)
 
 ctx.input = InputService.new(plugin, keyState)
 ctx.input:Bind()
@@ -61,13 +67,15 @@ local selectBtn = toolbar:CreateButton("Select","Select tool","rbxassetid://0")
 local boxBtn = toolbar:CreateButton("Box","Box select","rbxassetid://0")
 local moveBtn = toolbar:CreateButton("Move","Move tool","rbxassetid://0")
 local rotateBtn = toolbar:CreateButton("Rotate","Rotate tool","rbxassetid://0")
-local alignBtn = toolbar:CreateButton("Align","Align tool (J/L/I/K/U/O)","rbxassetid://0")
+local alignBtn = toolbar:CreateButton("Align","Align tool (J/L/I/K/U/O/C/T/S)","rbxassetid://0")
+local paletteBtn = toolbar:CreateButton("Palette","Command palette (Ctrl+P)","rbxassetid://0")
 
 selectBtn.Click:Connect(function() ctx.toolController:SetActive("select") end)
 boxBtn.Click:Connect(function() ctx.toolController:SetActive("boxselect") end)
 moveBtn.Click:Connect(function() ctx.toolController:SetActive("move") end)
 rotateBtn.Click:Connect(function() ctx.toolController:SetActive("rotate") end)
 alignBtn.Click:Connect(function() ctx.toolController:SetActive("align") end)
+paletteBtn.Click:Connect(function() ctx.palette:Open() end)
 
 local widget = Widget.new(plugin, { settingsStore = settingsStore, selectionStore = selectionStore }, function(action)
 	if action.type == "set" then

@@ -17,6 +17,11 @@ function SettingsStore.new()
 	self.surfaceSnapEnabled = false
 	self.alignToNormalEnabled = false
 
+	-- Per-axis grid (optional override). If nil, fall back to gridStep
+	self.gridStepX = nil
+	self.gridStepY = nil
+	self.gridStepZ = nil
+
 	return self
 end
 
