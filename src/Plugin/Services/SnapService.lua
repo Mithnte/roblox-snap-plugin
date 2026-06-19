@@ -2,9 +2,7 @@ local SnapService = {}
 SnapService.__index = SnapService
 
 function SnapService.new(settingsStore)
-	return setmetatable({
-		settings = settingsStore,
-	}, SnapService)
+	return setmetatable({ settings = settingsStore }, SnapService)
 end
 
 local function roundToStep(x, step)
@@ -16,11 +14,15 @@ function SnapService:SnapPosition(v3)
 		return v3
 	end
 	local s = self.settings.gridStep
-	return Vector3.new(
-		roundToStep(v3.X, s),
-		roundToStep(v3.Y, s),
-		roundToStep(v3.Z, s)
-	)
+	return Vector3.new(roundToStep(v3.X, s), roundToStep(v3.Y, s), roundToStep(v3.Z, s))
+end
+
+function SnapService:ProjectAxis(delta, axisLock)
+	if not axisLock then return delta end
+	if axisLock == "X" then return Vector3.new(delta.X, 0, 0) end
+	if axisLock == "Y" then return Vector3.new(0, delta.Y, 0) end
+	if axisLock == "Z" then return Vector3.new(0, 0, delta.Z) end
+	return delta
 end
 
 function SnapService:SnapAngleRad(angleRad)

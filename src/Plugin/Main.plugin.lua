@@ -5,6 +5,7 @@ local HistoryService = require(script.Services.HistoryService)
 local SnapService = require(script.Services.SnapService)
 local TransformService = require(script.Services.TransformService)
 local RaycastService = require(script.Services.RaycastService)
+local VisualService = require(script.Services.VisualService)
 local InputService = require(script.Services.InputService)
 local ToolController = require(script.Services.ToolController)
 local AlignService = require(script.Services.AlignService)
@@ -33,13 +34,15 @@ local ctx = {
 	history = history,
 	transform = transform,
 	snap = snap,
-	ray = nil, -- set below
+	ray = nil,
 	align = nil,
+	visual = nil,
 	_keyState = keyState,
 }
 
 ctx.ray = RaycastService.new(ctx)
 ctx.align = AlignService.new(ctx)
+ctx.visual = VisualService.new()
 
 ctx.input = InputService.new(plugin, keyState)
 ctx.input:Bind()
