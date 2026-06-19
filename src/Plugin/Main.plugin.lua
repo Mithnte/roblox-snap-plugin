@@ -32,7 +32,7 @@ local ctx = {
 	_keyState = keyState,
 }
 
-ctx.input = InputService.new(plugin)
+ctx.input = InputService.new(plugin, keyState)
 ctx.input:Bind()
 
 ctx.toolController = ToolController.new(ctx)
@@ -48,6 +48,15 @@ local toggleButton = toolbar:CreateButton(
 	"rbxassetid://0"
 )
 	toggleButton.ClickableWhenViewportHidden = true
+
+-- optional: quick tool buttons
+local selectBtn = toolbar:CreateButton("Select", "Select tool", "rbxassetid://0")
+local moveBtn = toolbar:CreateButton("Move", "Move tool", "rbxassetid://0")
+local rotateBtn = toolbar:CreateButton("Rotate", "Rotate tool", "rbxassetid://0")
+
+selectBtn.Click:Connect(function() ctx.toolController:SetActive("select") end)
+moveBtn.Click:Connect(function() ctx.toolController:SetActive("move") end)
+rotateBtn.Click:Connect(function() ctx.toolController:SetActive("rotate") end)
 
 local widget = Widget.new(plugin, { settingsStore = settingsStore, selectionStore = selectionStore }, function(action)
 	if action.type == "set" then
