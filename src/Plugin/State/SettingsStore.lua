@@ -14,6 +14,9 @@ function SettingsStore.new()
 	self.rotateStepDeg = Defaults.defaultRotateStepDeg
 	self.pivotMode = Defaults.pivotMode
 
+	self.surfaceSnapEnabled = false
+	self.alignToNormalEnabled = false
+
 	return self
 end
 

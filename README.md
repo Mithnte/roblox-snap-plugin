@@ -3,16 +3,20 @@
 Studio-native building / snap / transform plugin skeleton for Roblox Studio.
 
 ## Status
-Skeleton only — foundation for Move/Rotate tools, grid/rotate snapping, and DockWidget UI.
+In-progress builder toolkit with Move/Rotate + grid/rotate snapping, DockWidget UI, and early premium features.
 
-## Folder layout
-- `src/Plugin/` — plugin source (Luau)
+## Implemented (A–F starters)
+- Move drag with grid snapping + undo waypoints
+- Rotate via hotkeys (Q/E) with snap
+- Select tool + Box Select (XZ region MVP)
+- Align Tool (J/L/I/K/U/O) align to first selected
+- Toolbar buttons for Select/Box/Move/Rotate/Align
+- UI toggles: Grid/Rotate Snap, steps, Surface Snap (flag), Align-to-Normal (flag)
+- Quick Action: Toggle Anchor
 
-## Getting started (local)
-1. Create a Plugin project/container in Roblox Studio.
-2. Copy the contents of `src/Plugin` into your plugin container.
-3. Run Studio and enable the plugin from the Plugins tab.
-
-## Default snapping
-- Grid: 0.25 / 0.5 / 1 studs
-- Rotate: 15° / 45°
+## Next targets
+- Surface snap raycast + Align-to-normal application in Move tool
+- Collision/overlap preview
+- Linear array / smart duplicate offset
+- Per-axis grid snap
+- Command palette / hotkey UI
