@@ -1,22 +1,30 @@
-# roblox-snap-plugin
+# Roblox Builder Toolkit (Studio‑native)
 
-Studio-native building / snap / transform plugin skeleton for Roblox Studio.
+Premium builder productivity plugin for Roblox Studio.
 
-## Status
-In-progress builder toolkit with Move/Rotate + grid/rotate snapping, DockWidget UI, and early premium features.
+<p align="left">
+  <img alt="status" src="https://img.shields.io/badge/status-in_progress-blue" />
+  <img alt="license" src="https://img.shields.io/badge/license-TBD-lightgrey" />
+</p>
 
-## Implemented (A–F starters)
-- Move drag with grid snapping + undo waypoints
-- Rotate via hotkeys (Q/E) with snap
-- Select tool + Box Select (XZ region MVP)
-- Align Tool (J/L/I/K/U/O) align to first selected
-- Toolbar buttons for Select/Box/Move/Rotate/Align
-- UI toggles: Grid/Rotate Snap, steps, Surface Snap (flag), Align-to-Normal (flag)
-- Quick Action: Toggle Anchor
+## Features (snapshot)
+- Move drag + grid snap + axis lock + undo waypoints
+- Rotate (Q/E) with snap steps
+- Surface snap (raycast) + optional align‑to‑normal
+- Collision preview (green/red SelectionBox)
+- Select + Box Select (MVP)
+- Align to first (J/L/I/K/U/O)
+- Smart duplicate (Ctrl+Shift+D)
+- DockWidget panel for snaps + quick actions
 
-## Next targets
-- Surface snap raycast + Align-to-normal application in Move tool
-- Collision/overlap preview
-- Linear array / smart duplicate offset
-- Per-axis grid snap
-- Command palette / hotkey UI
+## Docs
+- docs/getting-started.md
+- docs/usage.md
+- docs/hotkeys.md
+- ROADMAP.md
+
+## Contributing
+See CONTRIBUTING.md and CODE_OF_CONDUCT.md.
+
+## License
+TBD — If you plan to sell on Marketplace, consider a proprietary license or dual-license (source on GitHub for issues; deliver packaged plugin on Marketplace). Open‑source options: MIT/Apache‑2.0.
