@@ -30,18 +30,18 @@ local snap = SnapService.new(settingsStore)
 local keyState = { shift = false }
 
 local ctx = {
-	plugin = plugin,
-	settingsStore = settingsStore,
-	selectionStore = selectionStore,
-	history = history,
-	transform = transform,
-	snap = snap,
-	ray = nil,
-	align = nil,
-	visual = nil,
-	array = nil,
-	palette = nil,
-	_keyState = keyState,
+        plugin = plugin,
+        settingsStore = settingsStore,
+        selectionStore = selectionStore,
+        history = history,
+        transform = transform,
+        snap = snap,
+        ray = nil,
+        align = nil,
+        visual = nil,
+        array = nil,
+        palette = nil,
+        _keyState = keyState,
 }
 
 ctx.ray = RaycastService.new(ctx)
@@ -78,24 +78,26 @@ alignBtn.Click:Connect(function() ctx.toolController:SetActive("align") end)
 paletteBtn.Click:Connect(function() ctx.palette:Open() end)
 
 local widget = Widget.new(plugin, { settingsStore = settingsStore, selectionStore = selectionStore }, function(action)
-	if action.type == "set" then
-		settingsStore:Set({ [action.key] = action.value })
-	elseif action.type == "quick" and action.op == "toggle_anchor" then
-		local sel = selectionStore:Get()
-		for _, inst in ipairs(sel) do
-			if inst:IsA("BasePart") then
-				inst.Anchored = not inst.Anchored
-			elseif inst:IsA("Model") then
-				for _, d in ipairs(inst:GetDescendants()) do
-					if d:IsA("BasePart") then d.Anchored = not d.Anchored end
-				end
-			end
-		end
-	end
+        if action.type == "set" then
+                settingsStore:Set({ [action.key] = action.value })
+        elseif action.type == "quick" and action.op == "toggle_anchor" then
+                local sel = selectionStore:Get()
+                for _, inst in ipairs(sel) do
+                        if inst:IsA("BasePart") then
+                                inst.Anchored = not inst.Anchored
+                        elseif inst:IsA("Model") then
+                                for _, d in ipairs(inst:GetDescendants()) do
+                                        if d:IsA("BasePart") then d.Anchored = not d.Anchored end
+                                end
+                        end
+                end
+        end
 end)
 
 widget:SetEnabled(false)
 
 toggleButton.Click:Connect(function()
-	widget:SetEnabled(not widget.gui.Enabled)
+        if widget and widget.gui then
+                widget:SetEnabled(not widget.gui.Enabled)
+        end
 end)
