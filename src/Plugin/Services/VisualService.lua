@@ -10,8 +10,10 @@ function VisualService.new()
 end
 
 function VisualService:Clear()
-	for inst, sb in pairs(self._selectionBoxes) do
-		if sb then sb:Destroy() end
+	for _, sb in pairs(self._selectionBoxes) do
+		if sb then
+			sb:Destroy()
+		end
 	end
 	self._selectionBoxes = {}
 end

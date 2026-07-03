@@ -11,6 +11,7 @@ return {
 	box = "",
 	move = "",
 	rotate = "",
+	scale = "",
 	align = "",
 	palette = "",
 }
