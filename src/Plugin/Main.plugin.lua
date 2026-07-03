@@ -91,6 +91,34 @@ local widget = Widget.new(plugin, { settingsStore = settingsStore, selectionStor
                                 end
                         end
                 end
+        elseif action.type == "history" then
+                if action.op == "undo" then
+                        history:Undo()
+                elseif action.op == "redo" then
+                        history:Redo()
+                end
+        elseif action.type == "align" then
+                local sel = selectionStore:Get()
+                if #sel < 2 then return end
+                history:Waypoint("Builder: Align (start)")
+                if action.op == "center" then
+                        ctx.align:CenterToFirst(sel)
+                elseif action.op == "match_rotation" then
+                        ctx.align:MatchRotation(sel)
+                elseif action.op == "match_size" then
+                        ctx.align:MatchSize(sel)
+                end
+                history:Waypoint("Builder: Align (end)")
+        elseif action.type == "array" then
+                local sel = selectionStore:Get()
+                if #sel == 0 then return end
+                if action.op == "linear" then
+                        ctx.array:Linear(sel, math.max(1, math.floor(action.count or 1)), Vector3.new(action.spacing or 0, 0, 0))
+                elseif action.op == "radial" then
+                        ctx.array:Radial(sel, math.max(1, math.floor(action.count or 1)), action.radius or 0, action.stepDeg or 0)
+                elseif action.op == "grid" then
+                        ctx.array:Grid(sel, math.max(1, math.floor(action.rows or 1)), math.max(1, math.floor(action.cols or 1)), action.spacingX or 0, action.spacingZ or 0)
+                end
         end
 end)
 

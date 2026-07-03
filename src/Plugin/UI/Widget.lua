@@ -19,6 +19,29 @@ local function makeDropdown(parent, labelText, options, onChanged)
         return function(setTo) for i, v in ipairs(options) do if v == setTo then idx = i break end end; button.Text = tostring(options[idx]) end
 end
 
+local function makeNumberField(parent, labelText, defaultValue)
+        local row = Instance.new("Frame"); row.Size = UDim2.new(1, -16, 0, 28); row.BackgroundTransparency = 1; row.Parent = parent
+        local label = Instance.new("TextLabel"); label.Size = UDim2.new(1, -70, 1, 0); label.BackgroundTransparency = 1; label.TextXAlignment = Enum.TextXAlignment.Left; label.Text = labelText; label.Parent = row
+        local box = Instance.new("TextBox")
+        box.Size = UDim2.new(0, 60, 0, 22)
+        box.Position = UDim2.new(1, -60, 0.5, -11)
+        box.Text = tostring(defaultValue)
+        box.ClearTextOnFocus = false
+        box.Parent = row
+        return function()
+                return tonumber(box.Text) or defaultValue
+        end
+end
+
+local function makeActionButton(parent, text, onClick)
+        local btn = Instance.new("TextButton")
+        btn.Size = UDim2.new(1, -16, 0, 26)
+        btn.Text = text
+        btn.Parent = parent
+        btn.MouseButton1Click:Connect(onClick)
+        return btn
+end
+
 function Widget.new(plugin, stores, onAction)
         local self = setmetatable({}, Widget)
         local info = DockWidgetPluginGuiInfo.new(Enum.InitialDockState.Left, true, false, 360, 520, 280, 340)
@@ -47,8 +70,36 @@ function Widget.new(plugin, stores, onAction)
         local alignNormalSetter = makeToggle(pad, "Align to Normal", function(v) onAction({ type = "set", key = "alignToNormalEnabled", value = v }) end)
 
         local title3 = Instance.new("TextLabel"); title3.Size = UDim2.new(1,0,0,24); title3.BackgroundTransparency = 1; title3.TextXAlignment = Enum.TextXAlignment.Left; title3.Text = "Quick Actions"; title3.Parent = pad
-        local anchorRow = Instance.new("TextButton"); anchorRow.Size = UDim2.new(1, -16, 0, 26); anchorRow.Text = "Toggle Anchor (Selection)"; anchorRow.Parent = pad
-        anchorRow.MouseButton1Click:Connect(function() onAction({ type = "quick", op = "toggle_anchor" }) end)
+        makeActionButton(pad, "Toggle Anchor (Selection)", function() onAction({ type = "quick", op = "toggle_anchor" }) end)
+        makeActionButton(pad, "Undo", function() onAction({ type = "history", op = "undo" }) end)
+        makeActionButton(pad, "Redo", function() onAction({ type = "history", op = "redo" }) end)
+
+        local title4 = Instance.new("TextLabel"); title4.Size = UDim2.new(1,0,0,24); title4.BackgroundTransparency = 1; title4.TextXAlignment = Enum.TextXAlignment.Left; title4.Text = "Align (needs 2+ selected)"; title4.Parent = pad
+        makeActionButton(pad, "Center to First", function() onAction({ type = "align", op = "center" }) end)
+        makeActionButton(pad, "Match Rotation to First", function() onAction({ type = "align", op = "match_rotation" }) end)
+        makeActionButton(pad, "Match Size to First", function() onAction({ type = "align", op = "match_size" }) end)
+
+        local title5 = Instance.new("TextLabel"); title5.Size = UDim2.new(1,0,0,24); title5.BackgroundTransparency = 1; title5.TextXAlignment = Enum.TextXAlignment.Left; title5.Text = "Array Tools (uses selection)"; title5.Parent = pad
+
+        local arrayCountGet = makeNumberField(pad, "Count", 5)
+        local arraySpacingGet = makeNumberField(pad, "Linear Spacing X", 4)
+        makeActionButton(pad, "Array Linear", function()
+                onAction({ type = "array", op = "linear", count = arrayCountGet(), spacing = arraySpacingGet() })
+        end)
+
+        local arrayRadiusGet = makeNumberField(pad, "Radial Radius", 6)
+        local arrayStepDegGet = makeNumberField(pad, "Radial Step (deg)", 30)
+        makeActionButton(pad, "Array Radial", function()
+                onAction({ type = "array", op = "radial", count = arrayCountGet(), radius = arrayRadiusGet(), stepDeg = arrayStepDegGet() })
+        end)
+
+        local arrayRowsGet = makeNumberField(pad, "Grid Rows", 2)
+        local arrayColsGet = makeNumberField(pad, "Grid Cols", 2)
+        local arraySpacingXGet = makeNumberField(pad, "Grid Spacing X", 4)
+        local arraySpacingZGet = makeNumberField(pad, "Grid Spacing Z", 4)
+        makeActionButton(pad, "Array Grid", function()
+                onAction({ type = "array", op = "grid", rows = arrayRowsGet(), cols = arrayColsGet(), spacingX = arraySpacingXGet(), spacingZ = arraySpacingZGet() })
+        end)
 
         stores.settingsStore.changed:Connect(function(s)
                 gridToggleSetter(s.gridSnapEnabled)
