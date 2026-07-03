@@ -20,7 +20,7 @@ local AlignTool = require(script.Tools.AlignTool)
 
 local Widget = require(script.UI.Widget)
 
-local settingsStore = SettingsStore.new()
+local settingsStore = SettingsStore.new(plugin)
 local selectionStore = SelectionStore.new()
 
 local history = HistoryService.new()
