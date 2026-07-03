@@ -8,8 +8,8 @@
 - Align pack: center, match rotation/size
 
 ### Medium‑term (Premium)
-- Vertex/edge/center snap
+- Vertex/edge/center snap — **done** (Move tool, toggle V, configurable threshold)
 - Ghost placement improvements
-- Palette/favorites + blueprints JSON
-- Command palette + hotkey editor
+- Palette/favorites + blueprints JSON — **done** (Blueprints panel: save/spawn/delete)
+- Command palette + hotkey editor — **done** (rebindable keys in Hotkeys panel)
 - Performance mode + safe mode

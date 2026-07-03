@@ -11,6 +11,8 @@ local ToolController = require(script.Services.ToolController)
 local AlignService = require(script.Services.AlignService)
 local ArrayService = require(script.Services.ArrayService)
 local CommandPalette = require(script.Services.CommandPalette)
+local BlueprintService = require(script.Services.BlueprintService)
+local Icons = require(script.Config.Icons)
 
 local SelectTool = require(script.Tools.SelectTool)
 local MoveTool = require(script.Tools.MoveTool)
@@ -49,6 +51,7 @@ ctx.align = AlignService.new(ctx)
 ctx.visual = VisualService.new()
 ctx.array = ArrayService.new(ctx)
 ctx.palette = CommandPalette.new(ctx)
+ctx.blueprint = BlueprintService.new(ctx)
 
 ctx.input = InputService.new(plugin, keyState)
 ctx.input:Bind()
@@ -62,13 +65,13 @@ ctx.toolController:RegisterTool("align", AlignTool.new(ctx))
 ctx.toolController:SetActive("select")
 
 local toolbar = plugin:CreateToolbar("Builder Toolkit")
-local toggleButton = toolbar:CreateButton("Toggle","Toggle Builder Toolkit","rbxassetid://0"); toggleButton.ClickableWhenViewportHidden = true
-local selectBtn = toolbar:CreateButton("Select","Select tool","rbxassetid://0")
-local boxBtn = toolbar:CreateButton("Box","Box select","rbxassetid://0")
-local moveBtn = toolbar:CreateButton("Move","Move tool","rbxassetid://0")
-local rotateBtn = toolbar:CreateButton("Rotate","Rotate tool","rbxassetid://0")
-local alignBtn = toolbar:CreateButton("Align","Align tool (J/L/I/K/U/O/C/T/S)","rbxassetid://0")
-local paletteBtn = toolbar:CreateButton("Palette","Command palette (Ctrl+P)","rbxassetid://0")
+local toggleButton = toolbar:CreateButton("Toggle","Toggle Builder Toolkit",Icons.toggle); toggleButton.ClickableWhenViewportHidden = true
+local selectBtn = toolbar:CreateButton("Select","Select tool",Icons.select)
+local boxBtn = toolbar:CreateButton("Box","Box select",Icons.box)
+local moveBtn = toolbar:CreateButton("Move","Move tool",Icons.move)
+local rotateBtn = toolbar:CreateButton("Rotate","Rotate tool",Icons.rotate)
+local alignBtn = toolbar:CreateButton("Align","Align tool (J/L/I/K/U/O/C/T/S)",Icons.align)
+local paletteBtn = toolbar:CreateButton("Palette","Command palette (Ctrl+P)",Icons.palette)
 
 selectBtn.Click:Connect(function() ctx.toolController:SetActive("select") end)
 boxBtn.Click:Connect(function() ctx.toolController:SetActive("boxselect") end)
@@ -119,6 +122,22 @@ local widget = Widget.new(plugin, { settingsStore = settingsStore, selectionStor
                 elseif action.op == "grid" then
                         ctx.array:Grid(sel, math.max(1, math.floor(action.rows or 1)), math.max(1, math.floor(action.cols or 1)), action.spacingX or 0, action.spacingZ or 0)
                 end
+        elseif action.type == "blueprint" then
+                if action.op == "save" then
+                        ctx.blueprint:SaveSelectedAs(action.name, selectionStore:Get())
+                elseif action.op == "spawn" then
+                        local mouse = plugin:GetMouse()
+                        local at = (mouse and mouse.Hit and mouse.Hit.Position) or Vector3.new(0, 5, 0)
+                        local spawned = ctx.blueprint:Spawn(action.name, at)
+                        if spawned then
+                                local Selection = game:GetService("Selection")
+                                Selection:Set(spawned)
+                        end
+                elseif action.op == "delete" then
+                        ctx.blueprint:Delete(action.name)
+                end
+        elseif action.type == "hotkey" then
+                settingsStore:SetBinding(action.action, action.keyCode)
         end
 end)
 

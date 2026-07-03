@@ -108,7 +108,13 @@ function MoveTool:Activate()
                         end
                 end
 
-                local snappedAvg = self.ctx.snap:SnapPosition(desiredAvg)
+                local snappedAvg = nil
+                if self.ctx.settingsStore.vertexSnapEnabled then
+                        local radius = math.max(self.ctx.settingsStore.vertexSnapThreshold or 1.5, self.ctx.settingsStore.edgeSnapThreshold or 1) + 4
+                        local targets = self.ctx.ray:GetNearbySnapTargets(desiredAvg, radius, selection)
+                        snappedAvg = self.ctx.snap:SnapToGeometry(desiredAvg, targets)
+                end
+                snappedAvg = snappedAvg or self.ctx.snap:SnapPosition(desiredAvg)
                 local appliedDelta = snappedAvg - (self._lastAppliedAvg or self._dragStartAvg)
                 if appliedDelta.Magnitude > 0 then
                         self.ctx.transform:Translate(selection, appliedDelta)
@@ -132,7 +138,7 @@ function MoveTool:Deactivate()
 end
 
 function MoveTool:OnKeyDown(input)
-        if input.KeyCode == Enum.KeyCode.M then self.ctx.toolController:SetActive("move"); return end
+        if input.KeyCode == self.ctx.settingsStore:GetKey("switch_move") then self.ctx.toolController:SetActive("move"); return end
         if input.KeyCode == Enum.KeyCode.X then self._axisLock = "X" end
         if input.KeyCode == Enum.KeyCode.Y then self._axisLock = "Y" end
         if input.KeyCode == Enum.KeyCode.Z then self._axisLock = "Z" end

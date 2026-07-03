@@ -1,0 +1,12 @@
+{
+  "name": "RobloxBuilderToolkit",
+  "tree": {
+    "$className": "DataModel",
+    "ServerStorage": {
+      "$className": "ServerStorage",
+      "BuilderToolkitPlugin": {
+        "$path": "src/Plugin"
+      }
+    }
+  }
+}

@@ -1,5 +1,42 @@
+local UserInputService = game:GetService("UserInputService")
+
 local Widget = {}
 Widget.__index = Widget
+
+local HOTKEY_LABELS = {
+        { action = "switch_select", label = "Select Tool" },
+        { action = "switch_move", label = "Move Tool" },
+        { action = "switch_rotate", label = "Rotate Tool" },
+        { action = "switch_box", label = "Box Select Tool" },
+        { action = "toggle_grid_snap", label = "Toggle Grid Snap" },
+        { action = "toggle_rotate_snap", label = "Toggle Rotate Snap" },
+        { action = "toggle_vertex_snap", label = "Toggle Vertex Snap" },
+}
+
+local function makeHotkeyRow(parent, label, currentKeyName, onCapture)
+        local row = Instance.new("Frame"); row.Size = UDim2.new(1, -16, 0, 28); row.BackgroundTransparency = 1; row.Parent = parent
+        local lbl = Instance.new("TextLabel"); lbl.Size = UDim2.new(1, -100, 1, 0); lbl.BackgroundTransparency = 1; lbl.TextXAlignment = Enum.TextXAlignment.Left; lbl.Text = label; lbl.Parent = row
+        local button = Instance.new("TextButton"); button.Size = UDim2.new(0, 90, 0, 22); button.Position = UDim2.new(1, -90, 0.5, -11); button.Text = currentKeyName; button.Parent = row
+
+        local listening = false
+        local conn = nil
+        button.MouseButton1Click:Connect(function()
+                if listening then return end
+                listening = true
+                button.Text = "Press a key..."
+                conn = UserInputService.InputBegan:Connect(function(input, gameProcessed)
+                        if input.UserInputType ~= Enum.UserInputType.Keyboard then return end
+                        listening = false
+                        conn:Disconnect()
+                        conn = nil
+                        local name = input.KeyCode.Name
+                        button.Text = name
+                        onCapture(name)
+                end)
+        end)
+
+        return function(setTo) if not listening then button.Text = setTo end end
+end
 
 local function makeToggle(parent, labelText, onChanged)
         local row = Instance.new("Frame"); row.Size = UDim2.new(1, -16, 0, 28); row.BackgroundTransparency = 1; row.Parent = parent
@@ -68,6 +105,11 @@ function Widget.new(plugin, stores, onAction)
         local title2 = Instance.new("TextLabel"); title2.Size = UDim2.new(1,0,0,24); title2.BackgroundTransparency = 1; title2.TextXAlignment = Enum.TextXAlignment.Left; title2.Text = "Placement"; title2.Parent = pad
         local surfaceSnapSetter = makeToggle(pad, "Surface Snap", function(v) onAction({ type = "set", key = "surfaceSnapEnabled", value = v }) end)
         local alignNormalSetter = makeToggle(pad, "Align to Normal", function(v) onAction({ type = "set", key = "alignToNormalEnabled", value = v }) end)
+        local vertexSnapSetter = makeToggle(pad, "Vertex/Edge Snap (V)", function(v) onAction({ type = "set", key = "vertexSnapEnabled", value = v }) end)
+        local vertexThresholdGet = makeNumberField(pad, "Vertex Threshold", 1.5)
+        makeActionButton(pad, "Apply Vertex Threshold", function()
+                onAction({ type = "set", key = "vertexSnapThreshold", value = vertexThresholdGet() })
+        end)
 
         local title3 = Instance.new("TextLabel"); title3.Size = UDim2.new(1,0,0,24); title3.BackgroundTransparency = 1; title3.TextXAlignment = Enum.TextXAlignment.Left; title3.Text = "Quick Actions"; title3.Parent = pad
         makeActionButton(pad, "Toggle Anchor (Selection)", function() onAction({ type = "quick", op = "toggle_anchor" }) end)
@@ -101,7 +143,60 @@ function Widget.new(plugin, stores, onAction)
                 onAction({ type = "array", op = "grid", rows = arrayRowsGet(), cols = arrayColsGet(), spacingX = arraySpacingXGet(), spacingZ = arraySpacingZGet() })
         end)
 
+        local title6 = Instance.new("TextLabel"); title6.Size = UDim2.new(1,0,0,24); title6.BackgroundTransparency = 1; title6.TextXAlignment = Enum.TextXAlignment.Left; title6.Text = "Blueprints (save/spawn Part groups)"; title6.Parent = pad
+        local bpRow = Instance.new("Frame"); bpRow.Size = UDim2.new(1, -16, 0, 28); bpRow.BackgroundTransparency = 1; bpRow.Parent = pad
+        local bpLabel = Instance.new("TextLabel"); bpLabel.Size = UDim2.new(0, 60, 1, 0); bpLabel.BackgroundTransparency = 1; bpLabel.TextXAlignment = Enum.TextXAlignment.Left; bpLabel.Text = "Name"; bpLabel.Parent = bpRow
+        local bpNameBox = Instance.new("TextBox"); bpNameBox.Size = UDim2.new(1, -60, 1, 0); bpNameBox.Position = UDim2.new(0, 60, 0, 0); bpNameBox.PlaceholderText = "my-preset"; bpNameBox.ClearTextOnFocus = false; bpNameBox.Parent = bpRow
+        makeActionButton(pad, "Save Selected as Blueprint", function()
+                onAction({ type = "blueprint", op = "save", name = bpNameBox.Text })
+        end)
+
+        local bpListRow = Instance.new("Frame"); bpListRow.Size = UDim2.new(1, -16, 0, 28); bpListRow.BackgroundTransparency = 1; bpListRow.Parent = pad
+        local bpListLabel = Instance.new("TextLabel"); bpListLabel.Size = UDim2.new(0, 60, 1, 0); bpListLabel.BackgroundTransparency = 1; bpListLabel.TextXAlignment = Enum.TextXAlignment.Left; bpListLabel.Text = "Saved"; bpListLabel.Parent = bpListRow
+        local bpDropdownBtn = Instance.new("TextButton"); bpDropdownBtn.Size = UDim2.new(1, -60, 1, 0); bpDropdownBtn.Position = UDim2.new(0, 60, 0, 0); bpDropdownBtn.Text = "(none saved)"; bpDropdownBtn.Parent = bpListRow
+
+        local selectedBlueprint = nil
+        local function refreshBlueprintList()
+                local names = {}
+                for n in pairs(stores.settingsStore.blueprints) do table.insert(names, n) end
+                table.sort(names)
+                if #names == 0 then
+                        selectedBlueprint = nil
+                        bpDropdownBtn.Text = "(none saved)"
+                        return
+                end
+                if not selectedBlueprint or not stores.settingsStore.blueprints[selectedBlueprint] then
+                        selectedBlueprint = names[1]
+                end
+                bpDropdownBtn.Text = selectedBlueprint
+                self._blueprintNames = names
+        end
+        bpDropdownBtn.MouseButton1Click:Connect(function()
+                local names = self._blueprintNames or {}
+                if #names == 0 then return end
+                local idx = 1
+                for i, n in ipairs(names) do if n == selectedBlueprint then idx = i break end end
+                idx = idx % #names + 1
+                selectedBlueprint = names[idx]
+                bpDropdownBtn.Text = selectedBlueprint
+        end)
+
+        makeActionButton(pad, "Spawn Blueprint (at mouse)", function()
+                if selectedBlueprint then onAction({ type = "blueprint", op = "spawn", name = selectedBlueprint }) end
+        end)
+        makeActionButton(pad, "Delete Blueprint", function()
+                if selectedBlueprint then onAction({ type = "blueprint", op = "delete", name = selectedBlueprint }) end
+        end)
+
+        local title7 = Instance.new("TextLabel"); title7.Size = UDim2.new(1,0,0,24); title7.BackgroundTransparency = 1; title7.TextXAlignment = Enum.TextXAlignment.Left; title7.Text = "Hotkeys (click, then press a key)"; title7.Parent = pad
+        for _, entry in ipairs(HOTKEY_LABELS) do
+                makeHotkeyRow(pad, entry.label, stores.settingsStore.keymap[entry.action], function(keyName)
+                        onAction({ type = "hotkey", action = entry.action, keyCode = keyName })
+                end)
+        end
+
         stores.settingsStore.changed:Connect(function(s)
+                refreshBlueprintList()
                 gridToggleSetter(s.gridSnapEnabled)
                 gridStepSetter(s.gridStep)
                 gridStepXSetter(s.gridStepX or "(inherit)")
@@ -111,6 +206,7 @@ function Widget.new(plugin, stores, onAction)
                 rotateStepSetter(s.rotateStepDeg)
                 surfaceSnapSetter(s.surfaceSnapEnabled)
                 alignNormalSetter(s.alignToNormalEnabled)
+                vertexSnapSetter(s.vertexSnapEnabled)
         end)
 
         gridToggleSetter(stores.settingsStore.gridSnapEnabled)
@@ -122,6 +218,21 @@ function Widget.new(plugin, stores, onAction)
         rotateStepSetter(stores.settingsStore.rotateStepDeg)
         surfaceSnapSetter(stores.settingsStore.surfaceSnapEnabled)
         alignNormalSetter(stores.settingsStore.alignToNormalEnabled)
+        vertexSnapSetter(stores.settingsStore.vertexSnapEnabled)
+        refreshBlueprintList()
+
+        if not stores.settingsStore.hasSeenOnboarding then
+                local tip = Instance.new("TextLabel")
+                tip.Size = UDim2.new(1, 0, 0, 60)
+                tip.BackgroundTransparency = 1
+                tip.TextWrapped = true
+                tip.TextXAlignment = Enum.TextXAlignment.Left
+                tip.TextYAlignment = Enum.TextYAlignment.Top
+                tip.LayoutOrder = -1
+                tip.Text = "Welcome! Press 1/2/3/B to switch tools, Ctrl+P for the command palette, and check the sections below for snapping, align, array and blueprint tools. This tip won't show again."
+                tip.Parent = pad
+                onAction({ type = "set", key = "hasSeenOnboarding", value = true })
+        end
 
         return self
 end

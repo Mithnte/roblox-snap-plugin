@@ -58,7 +58,7 @@ function BoxSelectTool:Deactivate()
 end
 
 function BoxSelectTool:OnKeyDown(input)
-        if input.KeyCode == Enum.KeyCode.B then
+        if input.KeyCode == self.ctx.settingsStore:GetKey("switch_box") then
                 self.ctx.toolController:SetActive("boxselect")
         end
 end

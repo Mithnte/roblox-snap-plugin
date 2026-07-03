@@ -12,6 +12,8 @@ local SETTINGS_KEY = "BuilderToolkit_Settings_v1"
 local PERSISTED_KEYS = {
         "gridSnapEnabled", "rotateSnapEnabled", "gridStep", "rotateStepDeg", "pivotMode",
         "surfaceSnapEnabled", "alignToNormalEnabled", "gridStepX", "gridStepY", "gridStepZ",
+        "vertexSnapEnabled", "vertexSnapThreshold", "edgeSnapThreshold", "keymap",
+        "blueprints", "hasSeenOnboarding",
 }
 
 function SettingsStore.new(plugin)
@@ -47,7 +49,52 @@ function SettingsStore.new(plugin)
         self.gridStepY = saved.gridStepY
         self.gridStepZ = saved.gridStepZ
 
+        self.vertexSnapEnabled = saved.vertexSnapEnabled
+        if self.vertexSnapEnabled == nil then self.vertexSnapEnabled = Defaults.vertexSnapEnabled end
+        self.vertexSnapThreshold = saved.vertexSnapThreshold or Defaults.vertexSnapThreshold
+        self.edgeSnapThreshold = saved.edgeSnapThreshold or Defaults.edgeSnapThreshold
+
+        self.keymap = {}
+        for action, keyName in pairs(Defaults.keymap) do
+                self.keymap[action] = keyName
+        end
+        if type(saved.keymap) == "table" then
+                for action, keyName in pairs(saved.keymap) do
+                        self.keymap[action] = keyName
+                end
+        end
+
+        self.blueprints = type(saved.blueprints) == "table" and saved.blueprints or {}
+        self.hasSeenOnboarding = saved.hasSeenOnboarding == true
+
         return self
+end
+
+-- Resolves a rebindable action name to its live Enum.KeyCode, falling back to
+-- the shipped default if the saved keymap has a stale/unknown entry.
+function SettingsStore:GetKey(action)
+        local name = self.keymap and self.keymap[action] or Defaults.keymap[action]
+        local keyCode = name and Enum.KeyCode[name]
+        return keyCode or Enum.KeyCode[Defaults.keymap[action]]
+end
+
+function SettingsStore:SetBinding(action, keyCodeName)
+        if not Defaults.keymap[action] then return end
+        self.keymap[action] = keyCodeName
+        self:_Save()
+        self.changed:Fire(self)
+end
+
+function SettingsStore:SaveBlueprint(name, data)
+        self.blueprints[name] = data
+        self:_Save()
+        self.changed:Fire(self)
+end
+
+function SettingsStore:DeleteBlueprint(name)
+        self.blueprints[name] = nil
+        self:_Save()
+        self.changed:Fire(self)
 end
 
 function SettingsStore:_Save()
