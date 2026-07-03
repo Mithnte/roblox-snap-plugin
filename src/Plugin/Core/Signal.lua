@@ -10,7 +10,9 @@ function Signal:Connect(fn)
 	local alive = true
 	return {
 		Disconnect = function()
-			if not alive then return end
+			if not alive then
+				return
+			end
 			alive = false
 			for i, h in ipairs(self._handlers) do
 				if h == fn then

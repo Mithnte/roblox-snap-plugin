@@ -1,0 +1,44 @@
+---
+# Self-contained selene standard library for this Roblox Studio plugin.
+#
+# `selene generate-roblox-std` fetches a full API dump over the network, which
+# isn't always reachable from CI. selene's `undefined_variable` lint only needs
+# to know the top-level global *names*; we declare exactly the Roblox globals
+# this project uses on top of the built-in `luau` base and mark them `any: true`
+# so field/method access on them isn't second-guessed. This keeps linting fast,
+# deterministic and fully offline while still catching genuinely undefined names.
+base: luau
+name: roblox
+globals:
+  game:
+    any: true
+  workspace:
+    any: true
+  script:
+    any: true
+  plugin:
+    any: true
+  task:
+    any: true
+  Enum:
+    any: true
+  Instance:
+    any: true
+  Vector3:
+    any: true
+  CFrame:
+    any: true
+  Color3:
+    any: true
+  UDim:
+    any: true
+  UDim2:
+    any: true
+  Region3:
+    any: true
+  OverlapParams:
+    any: true
+  RaycastParams:
+    any: true
+  DockWidgetPluginGuiInfo:
+    any: true
