@@ -1,0 +1,7 @@
+# Toolchain pinned with Rokit (https://github.com/rojo-rbx/rokit).
+# Contributors: install Rokit, then run `rokit install` from the repo root to
+# get the exact tool versions CI uses.
+[tools]
+rojo = "rojo-rbx/rojo@7.7.0"
+stylua = "JohnnyMorganz/StyLua@2.5.2"
+selene = "Kampfkarren/selene@0.31.0"

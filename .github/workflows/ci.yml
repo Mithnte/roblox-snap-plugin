@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Lint, format & compile
+    runs-on: ubuntu-latest
+    env:
+      STYLUA_VERSION: "2.5.2"
+      SELENE_VERSION: "0.31.0"
+      LUAU_VERSION: "0.727"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install StyLua
+        run: |
+          curl -sSL -o stylua.zip \
+            "https://github.com/JohnnyMorganz/StyLua/releases/download/v${STYLUA_VERSION}/stylua-linux-x86_64.zip"
+          sudo unzip -o -q stylua.zip -d /usr/local/bin
+          sudo chmod +x /usr/local/bin/stylua
+
+      - name: Install selene
+        run: |
+          curl -sSL -o selene.zip \
+            "https://github.com/Kampfkarren/selene/releases/download/${SELENE_VERSION}/selene-${SELENE_VERSION}-linux.zip"
+          sudo unzip -o -q selene.zip -d /usr/local/bin
+          sudo chmod +x /usr/local/bin/selene
+
+      - name: Install Luau
+        run: |
+          curl -sSL -o luau.zip \
+            "https://github.com/luau-lang/luau/releases/download/${LUAU_VERSION}/luau-ubuntu.zip"
+          sudo unzip -o -q luau.zip -d /usr/local/bin
+          sudo chmod +x /usr/local/bin/luau-compile
+
+      - name: StyLua (format check)
+        run: stylua --check src/
+
+      - name: selene (lint)
+        run: selene src/
+
+      - name: Luau (compile check)
+        run: |
+          fail=0
+          while IFS= read -r f; do
+            if ! luau-compile --null "$f" >/dev/null 2>&1; then
+              echo "::error file=$f::Luau compile failed"
+              luau-compile --null "$f" || true
+              fail=1
+            fi
+          done < <(find src -name "*.lua")
+          exit $fail
